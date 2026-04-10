@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Change Pro Â· é¥®åéæ¹</title>
+<style>
+  :root {
+    --brand: #C85A2A;
+    --brand-dark: #9B3A14;
+    --brand-light: #F5DDD1;
+    --bg: #F7F5F3;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #7A7A7A;
+    --border: #E8E3DF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Header */
+  .header { background: #1C0A00; color: white; padding: 16px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+  .header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 17px; font-weight: 700; color: #F5C89A; letter-spacing: 1px; white-space: nowrap; }
+  .logo span { color: white; font-weight: 300; }
+  .search-wrap { flex: 1; position: relative; }
+  .search-input { width: 100%; padding: 9px 14px 9px 38px; border: none; border-radius: 8px; font-size: 14px; background: rgba(255,255,255,0.12); color: white; outline: none; }
+  .search-input::placeholder { color: rgba(255,255,255,0.45); }
+  .search-input:focus { background: rgba(255,255,255,0.18); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: 0.5; pointer-events: none; }
+  .count-badge { font-size: 12px; color: rgba(255,255,255,0.5); white-space: nowrap; }
+
+  /* Category bar */
+  .cat-bar { background: white; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .cat-bar::-webkit-scrollbar { display: none; }
+  .cat-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 4px; padding: 10px 16px; white-space: nowrap; }
+  .cat-chip { padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--muted); transition: all 0.15s; font-weight: 500; flex-shrink: 0; }
+  .cat-chip:hover { border-color: var(--brand); color: var(--brand); }
+  .cat-chip.active { background: var(--brand); color: white; border-color: var(--brand); font-weight: 600; }
+
+  /* Grid */
+  .main { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border-radius: 12px; padding: 18px; border: 1px solid var(--border); cursor: pointer; transition: box-shadow 0.2s, transform 0.2s; }
+  .card:hover { box-shadow: 0 6px 24px rgba(200,90,42,0.15); transform: translateY(-2px); }
+  .card-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .card-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .cat-tag { font-size: 11px; background: var(--brand-light); color: var(--brand-dark); padding: 2px 9px; border-radius: 10px; font-weight: 600; }
+  .price-tag { font-size: 13px; color: var(--brand); font-weight: 700; }
+  .temp-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+  .temp-chip { font-size: 11px; padding: 2px 8px; border-radius: 8px; background: #FEF3C7; color: #92400E; font-weight: 500; }
+  .card-preview { font-size: 12px; color: var(--muted); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Modal */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end; padding: 0; }
+  .overlay.open { display: flex; }
+  @media (min-width: 600px) { .overlay { align-items: center; padding: 20px; } }
+  .modal { background: white; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 40px rgba(0,0,0,0.2); }
+  @media (min-width: 600px) { .modal { border-radius: 16px; } }
+  .modal-header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; position: sticky; top: 0; background: white; z-index: 1; border-radius: 20px 20px 0 0; }
+  @media (min-width: 600px) { .modal-header { border-radius: 16px 16px 0 0; } }
+  .modal-title { font-size: 19px; font-weight: 700; line-height: 1.3; }
+  .modal-close { background: var(--bg); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px; color: var(--muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .modal-body { padding: 18px 20px 28px; }
+  .modal-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .modal-price { font-size: 16px; color: var(--brand); font-weight: 700; }
+
+  /* Variant tabs */
+  .vtabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .vtab { padding: 7px 18px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--muted); transition: all 0.15s; font-weight: 500; }
+  .vtab:hover { border-color: var(--brand); color: var(--brand); }
+  .vtab.active { background: var(--brand); color: white; border-color: var(--brand); font-weight: 600; }
+  .vbody { animation: fadeUp 0.15s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .vmeta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .vmeta-pill { font-size: 12px; background: var(--bg); padding: 4px 12px; border-radius: 6px; color: var(--muted); }
+  .steps-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .step-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .step-row:last-child { border-bottom: none; }
+  .step-num { min-width: 24px; height: 24px; background: var(--brand); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">CHANGE <span>PRO</span></div>
+    <div class="search-wrap">
+      <span class="search-icon">ð</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="æç´¢é¥®ååç§°..." oninput="render()">
+    </div>
+    <div class="count-badge" id="countBadge">40æ¬¾</div>
+  </div>
+</div>
+
+<div class="cat-bar">
+  <div class="cat-inner" id="catBar"></div>
+</div>
+
+<div class="main">
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Detail Modal -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">â</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const RECIPES = [{"name": "ç¾å¼", "category": "ç¾å¼åå¡", "price": "10", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°´è³å»åº¦çº¿ï¼æ»¡æ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°´è³å»åº¦çº¿ï¼åæ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­/æ¸©ç­", "steps": "ç­ï¼ç­æ°´å 7åæ»¡ å·æ°´è¡¥å°8åæ»¡ å æµç¼© / æ¸©ç­ï¼ç­æ°´å 5åæ»¡ï¼å·æ°´è¡¥å°8åæ»¡ï¼å æµç¼©", "storeSize": "10ozç­æ¯", "deliverySize": "10ozç­æ¯"}], "id": "r0"}, {"name": "ç½æ±æç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "è¶å è³å»åº¦çº¿ï¼æ»¡æ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "è¶å è³å»åº¦çº¿ï¼åæ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r1"}, {"name": "æ¤°éç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "æ¤°å­æ°´å è³å»åº¦çº¿ï¼æ»¡æ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "æ¤°å­æ°´å è³å»åº¦çº¿ï¼åæ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r2"}, {"name": "ç½æå­æ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿ æ»¡å°  çº¢ç³æ¦´25å ç½æå­12å å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿ åæ¯å°  çº¢ç³æ¦´25å ç½æå­12å å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r3"}, {"name": "æ©å­æ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  æ»¡å° 20åæ©å­æé± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  åæ¯å° 20åæ©å­æé± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r4"}, {"name": "æ æª¬æ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  æ»¡æ¯å°  20åæ æª¬æ± 20åæ æª¬æè å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  åæ¯å°  20åæ æª¬æ± 20åæ æª¬æè å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r5"}, {"name": "è¡èæ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  æ»¡æ¯å° 20åè¡èæé± 30åè¡èæè¬æ± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  åæ¯å° 20åè¡èæé± 30åè¡èæè¬æ± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r6"}, {"name": "è èæ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  æ»¡æ¯å°  35åè èæé± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ°æ³¡æ°´è³å»åº¦çº¿  åæ¯å°  35åè èæé± å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r7"}, {"name": "å¹²å§æ°æ³¡ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å å¹²å§æ°æ³¡æ°´è³å»åº¦çº¿ï¼220gï¼ï¼å°åå è³8åæ»¡ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å å¹²å§æ°æ³¡æ°´è³å»åº¦çº¿ä¸æ¹ï¼250gï¼ï¼å°åå è³8åæ»¡ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r8"}, {"name": "è¡èéªæ¾ç¹è°", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "ä¸åéªæ¾æ°´20g   çè¶ä½³é¥®è¡èææ±30g   ä¸åèèç»¿è¶åèæ¶²30g    å°å120g   æ°´å«åæ»¡  ææåå  å å¥æµç¼©", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "ä¸åéªæ¾æ°´20g   çè¶ä½³é¥®è¡èææ±30g   ä¸åèèç»¿è¶åèæ¶²30g   å°å60g   æ°´å«åæ»¡   ææåå    å å¥æµç¼©", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "ä¸åéªæ¾æ°´20g   çè¶ä½³é¥®è¡èææ±30g   ä¸åèèç»¿è¶åèæ¶²30g   å°å60g   æ°´å«åæ»¡   ææåå    å å¥æµç¼©", "storeSize": "", "deliverySize": ""}], "id": "r9"}, {"name": "çº¢æ èç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "ä¸åæ èæé±20g  å°å150g  æ°´å«åæ»¡  ææåå  å å¥æµç¼©", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "ä¸åæ èæé±20g  å°å100g æ°´å«åæ»¡ ææåå å å¥æµç¼©", "storeSize": "", "deliverySize": ""}, {"temp": "å»å°", "steps": "ä¸åæ èæé±20g  æ°´å«åæ»¡ ææåå å å¥æµç¼©", "storeSize": "", "deliverySize": ""}], "id": "r10"}, {"name": "ä¹æ¢ç¹è°ç¾å¼", "category": "ç¾å¼åå¡", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "éªåæ¯å å¥ é¸æ¢ç²25g  ä¸åèèç»¿è¶åèæ¶²10g  å°å150g  å å¥æµç¼©  è¡¥æ°´è³350ml  æååºå", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "éªåæ¯å å¥ é¸æ¢ç²25g ä¸ååèè¶10g å°å100g å å¥æµç¼© è¡¥æ°´è³350ml æååºå", "storeSize": "", "deliverySize": ""}], "id": "r11"}, {"name": "æ¿éåå¡", "category": "æ¿é", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å å¥¶è³å»åº¦çº¿ æ»¡æ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å å¥¶è³å»åº¦çº¿ åæ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­/æ¸©ç­", "steps": "ç­æ¯æ¾å¥æµç¼© å¥¶ç¼¸å å¥220mlçå¥¶æç­ èå åºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r12"}, {"name": "çéº¦æ¿é", "category": "æ¿é", "price": "18", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å çéº¦å¥¶è³å»åº¦çº¿ æ»¡æ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å çéº¦å¥¶è³å»åº¦çº¿ åæ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "ç­æ¯æ¾å¥æµç¼© å¥¶ç¼¸å å¥220mlçéº¦å¥¶æç­ èå åºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r13"}, {"name": "çæ¤°æ¿é", "category": "æ¿é", "price": "20", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å æ¤°å¥¶è³å»åº¦çº¿ æ»¡æ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å æ¤°å¥¶è³å»åº¦çº¿ åæ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r14"}, {"name": "æµ·çå°èè·æ¿é", "category": "æ¿é", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å å¥¶è³å»åº¦çº¿ 25åæµ·çèè·ç³æµ æ»¡æ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å å¥¶è³å»åº¦çº¿ 25åæµ·çèè·ç³æµ åæ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r15"}, {"name": "å°åå®¢æ¿é", "category": "æ¿é", "price": "18", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å¥¶å è³å»åº¦çº¿ æ»¡æ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å¥¶å è³å»åº¦çº¿ åæ¯å° å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "ç­æ¯æ¾å¥æµç¼© å¥¶ç¼¸å å¥220mlå°åå®¢å¥¶æç­ èå åºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r16"}, {"name": "æ¹è¶æ¿é", "category": "æ¿é", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "çå¥¶å è³å»åº¦çº¿ æ»¡æ¯å° æ¹è¶ç²5å 35åçå¼æ°´ 25åçæå­è±æ¶²", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "çå¥¶å è³å»åº¦çº¿ åæ¯å° æ¹è¶ç²5å 35åçå¼æ°´ 25åçæå­è±æ¶²", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "ç­æ¯æ¾å¥æ¹è¶ä¸25gæå­è±æ¶²å¥¶ ç¼¸å å¥220mlå¥¶æç­ èå åºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r17"}, {"name": "æ¡è±éé¿æ¿é", "category": "æ¿é", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "å çå¥¶è³å»åº¦çº¿ æ»¡æ¯å° 10åæ¡è±é±ææ¯å£ 10åéé¿5åæ¡è±ç³æµ ææåå å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "å çå¥¶è³å»åº¦çº¿ åæ¯å° 10åæ¡è±é±ææ¯å£ 10åéé¿5åæ¡è±ç³æµ ææåå å æµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}], "id": "r18"}, {"name": "å¸èå£«é£å³æ¿é", "category": "æ¿é", "price": "20", "variants": [{"temp": "æ­£å¸¸å°", "steps": "çå¥¶åè³å»åº¦çº¿ å å¥50gkirièå£«ä¹³ï¼æ»¡æ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "çå¥¶åè³å»åº¦çº¿ å å¥50gkirièå£«ä¹³ï¼åæ¯å°ï¼åæµç¼©", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "ç­æ¯æ¾å¥æµç¼©ä¸æ·¡å¥¶æ²¹ å¥¶ç¼¸å å¥220mlå¥¶æç­ èå åºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r19"}, {"name": "é»æ²¹èèæ¿é", "category": "æ¿é", "price": "20", "variants": [{"temp": "æ­£å¸¸å°", "steps": "120åå¿å¦é»æ²¹çä¹³    120åçå¥¶\næåå å¥ä¸ä»½æµç¼©        åºåæ¯ï¼å¹³éº10åå¯å¯ç¾å©é»æ²¹èè", "storeSize": "", "deliverySize": "16oz petæ¯"}], "id": "r20"}, {"name": "é»èéº»æ¿é", "category": "æ¿é", "price": "18", "variants": [{"temp": "æ­£å¸¸å°", "steps": "10gèéº»é±æå£ 15åèéº»é±ã30åkirièå£«ä¹³ã150MLé²å¥¶ æåå¨æååå\næåå äººå°åè³9åæ»¡ åå¥æµç¼©åºæ¯", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "10gèéº»é±æå£ 15åèéº»é±ã30åkirièå£«ä¹³ã200MLé²å¥¶ æåå¨æååå\næåå äººå°åè³9åæ»¡ åå¥æµç¼©åºæ¯", "storeSize": "", "deliverySize": ""}, {"temp": "ç­", "steps": "åå¨çº¸æ¯ä¸­å å¥20åé»èéº»é± 30gkirièå£«ä¹³ åå å¥ä¸ä»½æµç¼© ææåå\nç¶åå¨å¥¶ç¼¸ä¸­å å¥300æ¯«åçå¥¶ å ç­", "storeSize": "", "deliverySize": ""}], "id": "r21"}, {"name": "è¦å°½çæ¥æ¿é", "category": "æ¿é", "price": "18", "variants": [{"temp": "æ­£å¸¸å°", "steps": "æ©æ±30ml  æ©ç®ç³æµ6ml  çå¥¶150ml  ææåå  å å¥å°åå«åæ»¡  å å¥æµç¼©  åºåæ¯ååæä¸å±æ³èå¨", "storeSize": "", "deliverySize": ""}, {"temp": "å°å°", "steps": "æ©æ±30ml  æ©ç®ç³æµ6ml  çå¥¶200ml  ææåå  å å¥å°åå«åæ»¡  å å¥æµç¼©  åºåæ¯ååæä¸å±æ³èå¨", "storeSize": "", "deliverySize": ""}, {"temp": "ç­", "steps": "æ©æ±30ml  æ©ç®ç³æµ6ml  çå¥¶å«åæ»¡ å å¥æµç¼© åºåæ¯ååæä¸å±æ³èå¨", "storeSize": "", "deliverySize": ""}], "id": "r22"}, {"name": "ç¤åææ¿é", "category": "æ¿é", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "åå¨æ¯ä¸­å å¥10åæµ·çç¢§æ ¹æç³æµ å å¥çå¥¶200æ¯«å\nç¶åå å¥å°åè³9åæ»¡ æååå¥æµç¼© åºæ¯", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "åå¨æ¯ä¸­å å¥10åæµ·çç¢§æ ¹æç³æµ å¨å å¥çå¥¶250æ¯«å\nç¶åå å¥å°åè³9åæ»¡ æååå¥æµç¼© åºæ¯", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "åå¨çº¸æ¯ä¸­å å¥10åæµ·çç¢§æ ¹æç³æµ å å¥æµç¼©\nç¶åå¥¶ç¼¸ä¸­å å¥350æ¯«åçå¥¶ å ç­èå æååºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r23"}, {"name": "æ¸æ©æ¿é", "category": "æ¿é", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "åå¨æ¯ä¸­å å¥10åæ©å­ç³æµ å å¥çå¥¶200æ¯«å\nç¶åå å¥å°åè³9åæ»¡ æååå¥æµç¼© åºæ¯", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "åå¨æ¯ä¸­å å¥10åæ©å­ç³æµ å å¥çå¥¶250æ¯«å\nç¶åå°åå è³9åæ»¡ æåå å¥æµç¼© åºæ¯", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "åå¨æ¯ä¸­å å¥5åæ©å­ç³æµ å å¥æµç¼©\nç¶åå¥¶ç¼¸éå å¥350æ¯«åçå¥¶ å ç­èå æååºæ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r24"}, {"name": "å¯å¯", "category": "å¯å¯", "price": "15", "variants": [{"temp": "æ­£å¸¸å°", "steps": "30åé¿åç°ç²ï¼15åæ³èå¨å¯å¯ç²ï¼20gkirièå£«ä¹³ï¼60gç­æ°´èåï¼200gçå¥¶ å å¥å°åè³8åæ»¡ åå¥å·§ååæ¶²", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "å°å°", "steps": "30åé¿åç°ç²ï¼15åæ³èå¨å¯å¯ç²ï¼20gkirièå£«ä¹³ï¼60gç­æ°´èå 250gçå¥¶ å å¥å°åè³8åæ»¡ åå¥å·§ååæ¶²", "storeSize": "12oz petæ¯", "deliverySize": "16oz petæ¯"}, {"temp": "ç­", "steps": "30åé¿åç°ç²ï¼15åæ³èå¨å¯å¯ç², 20gkirièå£«ä¹³ï¼220gçå¥¶åå¥æè±ç¼¸å ç­ï¼åå¥çº¸æ¯", "storeSize": "ç­æ¯", "deliverySize": "ç­æ¯"}], "id": "r25"}, {"name": "çéº¦å¯å¯", "category": "å¯å¯", "price": "18", "variants": [{"temp": "", "steps": "æåºå°ççå¥¶æ¢æçéº¦å¥¶ å¶ä½ä¸å", "storeSize": "", "deliverySize": ""}], "id": "r26"}, {"name": "æ©å­æ°æ³¡æ°´ ï¼10åï¼", "category": "æ°æ³¡æ°´", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "20åæ©å­æé± æ»¡æ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "20åæ©å­æé± åæ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r27"}, {"name": "æ æª¬æ°æ³¡æ°´ï¼10åï¼", "category": "æ°æ³¡æ°´", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "20åæ æª¬æ± 20åæ æª¬æè æ»¡æ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "20åæ æª¬æ± 20åæ æª¬æè åæ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r28"}, {"name": "è¡èæ°æ³¡æ°´ï¼10åï¼", "category": "æ°æ³¡æ°´", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "20åè¡èæé± 30åè¡èæè¬æ± æ»¡æ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "20åè¡èæé± 30åè¡èæè¬æ± åæ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r29"}, {"name": "è èæ°æ³¡æ°´ï¼10åï¼", "category": "æ°æ³¡æ°´", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "35åè èæé± å å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "35åè èæé± åæ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r30"}, {"name": "ä»²å¤å¤ä¹é²ï¼15åï¼", "category": "æ°æ³¡æ°´", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "35åé»å ä» 10åæ¥éª¨æ¨ç³æµ 2çé¦æ°´æ æª¬ æ»¡æ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "35åé»å ä» 10åæ¥éª¨æ¨ç³æµ 2çé¦æ°´æ æª¬ åæ¯å° æ°æ³¡æ°´å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r31"}, {"name": "æµ·çæ æª¬å°æ²", "category": "å°æ²ï¼10åï¼", "price": "", "variants": [{"temp": "", "steps": "10åæ æª¬å³bcaaç² 250åå° 250åæ°´ æ30ç§ åºæ¯", "storeSize": "500ppæ¯", "deliverySize": "500ppæ¯"}], "id": "r32"}, {"name": "çæ²¹æé¦èå¥¶æ", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "", "storeSize": "500ppæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "ä¸æ ¹é¦è ä¸ä¸ªçæ²¹æ 80åçå° 50åæ°´ 130åçå¥¶ 20åèç½ç² æ30ç§ åºæ¯", "storeSize": "500ppæ¯", "deliverySize": "500ppæ¯"}, {"temp": "å»å°", "steps": "ä¸æ ¹é¦è ä¸ä¸ªçæ²¹æ 150åçæ°´ 150åçå¥¶ 20åèç½ç² æ30ç§ åºæ¯", "storeSize": "500ppæ¯", "deliverySize": "500ppæ¯"}], "id": "r33"}, {"name": "èèå¥¶æ", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "å°", "steps": "40åå·å»èè æä»11å é¦è100  é¸å¥¶120æ¯«å çå¥¶100æ¯«å å°å100å", "storeSize": "å¯å èç½ç² \nä¸åºå 5å", "deliverySize": "500ppæ¯"}, {"temp": "å»å°", "steps": "40åå·å»èè æä»11å é¦è100å é¸å¥¶120æ¯«å çå¥¶100æ¯«å æ°´100æ¯«å", "storeSize": "", "deliverySize": "500ppæ¯"}], "id": "r34"}, {"name": "å·´æ¦æ¨çæ²¹æå¥¶æ", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "å°", "steps": "çæ²¹æä¸ä¸ª æä»11g é¸å¥¶140æ¯«å çå¥¶150æ¯«å å°å100å", "storeSize": "å¯å èç½ç² \nä¸åºå 5å", "deliverySize": "500ppæ¯"}, {"temp": "å»å°", "steps": "çæ²¹æä¸ä¸ª æä»11g é¸å¥¶140æ¯«å çå¥¶150æ¯«å æ°´100æ¯«å", "storeSize": "", "deliverySize": "500ppæ¯"}], "id": "r35"}, {"name": "èèé¸å¥¶å¥¶æ", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "80åçé¸å¥¶   20åçåä¹³   100åçå¥¶  100åå°å  50åæ°´ 40åèèæé± 50åå·å»èè\nåºåæ¯:20åé¸å¥¶éºåº +èèç¢è£é¥°å°é¡¶", "storeSize": "å¯å èç½ç² \nä¸åºå 5å", "deliverySize": "500ppæ¯"}], "id": "r36"}, {"name": "ç«é¾æå¥¶æ", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "é¸å¥¶120g  åä¹³65g  ç«é¾æ100g  é¶å¡ç³15g  å°å200g", "storeSize": "å¯å èç½ç² \nä¸åºå 5å", "deliverySize": "500ppæ¯"}, {"temp": "å°å°", "steps": "é¸å¥¶120g  åä¹³65g  ç«é¾æ100g  é¶å¡ç³15g  å°å100g  æ°´50g", "storeSize": "", "deliverySize": "500ppæ¯"}, {"temp": "å»å°", "steps": "é¸å¥¶120g  åä¹³65g  ç«é¾æ100g  é¶å¡ç³15g  æ°´100g", "storeSize": "", "deliverySize": ""}], "id": "r37"}, {"name": "è¶é¥®", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "æ­£å¸¸å°", "steps": "æ»¡æ¯å° ç½æ±æè¶å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r38"}, {"name": "ç½æ±æè¶ï¼10åï¼", "category": "å¥¶æï¼20åï¼", "price": "", "variants": [{"temp": "å°å°", "steps": "åæ¯å° ç½æ±æè¶å æ»¡", "storeSize": "12oz petæ¯", "deliverySize": "500ppæ¯"}], "id": "r39"}];
+
+let activeCat = 'all';
+let activeVariant = 0;
+let currentRecipe = null;
+
+// Build categories
+const cats = ['å¨é¨', ...new Set(RECIPES.map(r => r.category))];
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+
+  // Category chips
+  document.getElementById('catBar').innerHTML = cats.map(c => {
+    const key = c === 'å¨é¨' ? 'all' : c;
+    return `<div class="cat-chip${activeCat === key ? ' active' : ''}" onclick="setCat('${key}')">${c}</div>`;
+  }).join('');
+
+  let filtered = RECIPES;
+  if (activeCat !== 'all') filtered = filtered.filter(r => r.category === activeCat);
+  if (q) filtered = filtered.filter(r => {
+    const hay = [r.name, r.category, ...(r.variants||[]).map(v => v.temp+' '+v.steps)].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  document.getElementById('countBadge').textContent = filtered.length + 'æ¬¾';
+
+  const grid = document.getElementById('grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">â</div><div>æªæ¾å°å¹éçé¥®å</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => {
+    const temps = (r.variants||[]).map(v => v.temp).filter(Boolean);
+    const tempChips = temps.map(t => `<span class="temp-chip">${t}</span>`).join('');
+    const preview = r.variants && r.variants[0] ? r.variants[0].steps.split('\n')[0] : '';
+    return `<div class="card" onclick="openDetail('${r.id}')">
+      <div class="card-name">${r.name}</div>
+      <div class="card-meta">
+        <span class="cat-tag">${r.category}</span>
+        ${r.price ? `<span class="price-tag">Â¥${r.price}</span>` : ''}
+      </div>
+      <div class="temp-chips">${tempChips}</div>
+      ${preview ? `<div class="card-preview">${preview}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  render();
+}
+
+function openDetail(id) {
+  currentRecipe = RECIPES.find(r => r.id === id);
+  if (!currentRecipe) return;
+  activeVariant = 0;
+  document.getElementById('modalTitle').textContent = currentRecipe.name;
+  renderModalBody();
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModalBody() {
+  const r = currentRecipe;
+  const v = r.variants[activeVariant];
+
+  const tabs = r.variants.map((vv, i) =>
+    `<button class="vtab${i === activeVariant ? ' active' : ''}" onclick="switchTab(${i})">${vv.temp || 'é»è®¤'}</button>`
+  ).join('');
+
+  const steps = v.steps ? v.steps.split('\n').filter(Boolean).map((s, i) =>
+    `<div class="step-row"><span class="step-num">${i+1}</span><span class="step-text">${s}</span></div>`
+  ).join('') : '<div style="color:var(--muted);font-size:14px;padding:8px 0">ææ æ­¥éª¤è¯´æ</div>';
+
+  const metaPills = [
+    v.storeSize ? `ðª é¨åºï¼${v.storeSize}` : null,
+    v.deliverySize ? `ð¦ å¤åï¼${v.deliverySize}` : null
+  ].filter(Boolean).map(m => `<span class="vmeta-pill">${m}</span>`).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-meta">
+      <span class="cat-tag">${r.category}</span>
+      ${r.price ? `<span class="modal-price">Â¥${r.price}</span>` : ''}
+    </div>
+    ${r.variants.length > 1 ? `<div class="vtabs">${tabs}</div>` : ''}
+    <div class="vbody">
+      ${metaPills ? `<div class="vmeta-row">${metaPills}</div>` : ''}
+      <div class="steps-label">å¶ä½æµç¨</div>
+      <div>${steps}</div>
+    </div>
+  `;
+}
+
+function switchTab(i) {
+  activeVariant = i;
+  renderModalBody();
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentRecipe = null;
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+render();
+</script>
+</body>
+</html>
